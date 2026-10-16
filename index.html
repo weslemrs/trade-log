@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TRADE LOG">
+<meta name="theme-color" content="#0B0D10">
+<title>TRADE LOG</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<style>
+  html,body{margin:0;height:100%;background:#0B0D10;color:#E6E8EB;font:15px/1.45 -apple-system,system-ui,sans-serif;overflow:hidden}
+  #wrap{position:fixed;left:0;right:0;top:env(safe-area-inset-top);bottom:env(safe-area-inset-bottom);background:#0B0D10}
+  #bottom{position:fixed;left:0;right:0;bottom:0;height:env(safe-area-inset-bottom);background:#0F1216}
+  iframe{border:0;width:100%;height:100%;display:block;background:#0B0D10}
+  #setup{display:none;position:fixed;inset:0;padding:calc(env(safe-area-inset-top) + 40px) 20px 20px;box-sizing:border-box;overflow:auto}
+  #setup.on{display:block}
+  h1{font-size:15px;letter-spacing:.3em;margin:0 0 6px}
+  p{color:#8A94A3;font-size:14px;margin:0 0 18px}
+  textarea{width:100%;box-sizing:border-box;min-height:110px;background:#12151A;color:#E6E8EB;border:1px solid #2A303A;border-radius:12px;padding:12px;font:15px ui-monospace,monospace;outline:none}
+  button{margin-top:12px;width:100%;padding:14px;border:0;border-radius:12px;background:#E6E8EB;color:#0B0D10;font-weight:600;font-size:16px}
+  #err{color:#E5484D;font-size:13px;min-height:18px;margin-top:8px}
+</style>
+</head>
+<body>
+<div id="wrap"></div><div id="bottom"></div>
+<div id="setup">
+  <h1>TRADE LOG</h1>
+  <p>Cole o link do app (o endereço que termina em <b>/exec?k=…</b>). Ele fica salvo só neste aparelho. Para trocar depois, abra este endereço com <b>?reset</b> no final.</p>
+  <textarea id="url" placeholder="https://script.google.com/macros/s/.../exec?k=..." autocapitalize="off" autocorrect="off" spellcheck="false"></textarea>
+  <div id="err"></div>
+  <button id="ok">Salvar e abrir</button>
+</div>
+<script>
+  var K = 'tradelog.url';
+  function get() { try { return localStorage.getItem(K); } catch (e) { return null; } }
+  function set(v) { try { v ? localStorage.setItem(K, v) : localStorage.removeItem(K); } catch (e) {} }
+  if (/[?&]reset\b/.test(location.search)) { set(null); history.replaceState(null, '', location.pathname); }
+  function abrir(u) {
+    var f = document.createElement('iframe');
+    f.src = u; f.setAttribute('allow', 'clipboard-write');
+    document.getElementById('wrap').appendChild(f);
+  }
+  var u = get();
+  if (u) abrir(u);
+  else document.getElementById('setup').classList.add('on');
+  document.getElementById('ok').onclick = function () {
+    var v = document.getElementById('url').value.trim();
+    if (!/^https:\/\/script\.google\.com\/.+\/exec\?(.*&)?k=[^&]+/.test(v)) { document.getElementById('err').textContent = 'Link inválido. Ele precisa começar com https://script.google.com/ e terminar com /exec?k=SUA_CHAVE.'; return; }
+    set(v); document.getElementById('setup').classList.remove('on'); abrir(v);
+  };
+</script>
+</body>
+</html>
